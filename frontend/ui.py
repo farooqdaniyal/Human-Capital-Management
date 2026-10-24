@@ -225,44 +225,106 @@ def inject_css():
             box-shadow: 0 18px 50px rgba(0,0,0,.22);
         }
 
-        /* ---------- Inputs dark fix ---------- */
-        label, .stTextInput label, .stTextArea label, .stSelectbox label,
-        .stDateInput label, .stNumberInput label {
-            color: #9fb0e6 !important;
-            font-weight: 700 !important;
+        /* ---------- Inputs / Forms dark fix ---------- */
+        label,
+        .stTextInput label,
+        .stTextArea label,
+        .stSelectbox label,
+        .stDateInput label,
+        .stNumberInput label {
+            color: #93c5fd !important;
+            font-weight: 800 !important;
         }
 
-        div[data-baseweb="input"] > div,
-        div[data-baseweb="select"] > div,
-        div[data-baseweb="textarea"] > div {
-            background: rgba(8, 19, 50, .95) !important;
-            border: 1px solid rgba(79,109,245,.38) !important;
+        .stTextInput input,
+        .stNumberInput input,
+        .stDateInput input,
+        .stTextArea textarea,
+        div[data-baseweb="input"] input,
+        div[data-baseweb="textarea"] textarea {
+            background: #081332 !important;
+            color: #f8fafc !important;
+            -webkit-text-fill-color: #f8fafc !important;
+            border: 1px solid rgba(126,166,255,.42) !important;
             border-radius: 13px !important;
-            color: #e8edff !important;
-        }
-
-        input, textarea {
-            color: #e8edff !important;
             caret-color: #22d3ee !important;
+            box-shadow: none !important;
         }
 
-        input::placeholder, textarea::placeholder {
-            color: #7f8dbb !important;
+        .stTextInput input::placeholder,
+        .stNumberInput input::placeholder,
+        .stDateInput input::placeholder,
+        .stTextArea textarea::placeholder {
+            color: #93a4d8 !important;
+            opacity: 1 !important;
+            -webkit-text-fill-color: #93a4d8 !important;
+        }
+
+        div[data-baseweb="input"],
+        div[data-baseweb="input"] > div,
+        div[data-baseweb="textarea"],
+        div[data-baseweb="textarea"] > div,
+        div[data-baseweb="select"] > div {
+            background: #081332 !important;
+            color: #f8fafc !important;
+            border-color: rgba(126,166,255,.42) !important;
+            border-radius: 13px !important;
+        }
+
+        div[data-baseweb="select"] span,
+        div[data-baseweb="select"] div {
+            color: #f8fafc !important;
+            -webkit-text-fill-color: #f8fafc !important;
+        }
+
+        div[data-baseweb="popover"],
+        ul[role="listbox"],
+        li[role="option"],
+        div[role="option"] {
+            background: #081332 !important;
+            color: #f8fafc !important;
+        }
+
+        li[role="option"]:hover,
+        div[role="option"]:hover {
+            background: rgba(79,109,245,.25) !important;
+        }
+
+        .stNumberInput button {
+            background: #0b1b45 !important;
+            color: #f8fafc !important;
+            border-color: rgba(126,166,255,.35) !important;
+        }
+
+        .stDateInput svg,
+        .stNumberInput svg,
+        .stSelectbox svg {
+            color: #c7d2fe !important;
+            fill: #c7d2fe !important;
+        }
+
+        input:disabled,
+        textarea:disabled {
+            background: #0b1228 !important;
+            color: #cbd5e1 !important;
+            -webkit-text-fill-color: #cbd5e1 !important;
             opacity: 1 !important;
         }
 
-        div[data-baseweb="select"] span {
-            color: #e8edff !important;
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        textarea:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0 1000px #081332 inset !important;
+            -webkit-text-fill-color: #f8fafc !important;
+            caret-color: #22d3ee !important;
         }
 
-        div[data-baseweb="popover"] {
-            background: #081332 !important;
-            border: 1px solid rgba(79,109,245,.38) !important;
-        }
-
-        div[role="listbox"] {
-            background: #081332 !important;
-            color: #e8edff !important;
+        div[data-testid="stForm"] {
+            background: rgba(7, 15, 42, .72) !important;
+            border: 1px solid rgba(126,166,255,.18) !important;
+            border-radius: 18px !important;
+            padding: 1rem !important;
         }
 
         /* ---------- Buttons ---------- */
@@ -470,9 +532,9 @@ def inject_css():
 
 
 def page_header(title: str, subtitle: str = ""):
-    st.markdown(f'<div class="page-title">{title}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="page-title">{html.escape(str(title))}</div>', unsafe_allow_html=True)
     if subtitle:
-        st.markdown(f'<div class="page-subtitle">{subtitle}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="page-subtitle">{html.escape(str(subtitle))}</div>', unsafe_allow_html=True)
 
 
 def kpi_card(label: str, value, help_text: str = "", icon: str = "📊", color: str = "#4f46e5"):
@@ -542,14 +604,14 @@ def data_table(df, columns=None, headers=None, max_rows=50, empty_text="No recor
     Use this instead of st.dataframe for better UI.
     """
     if df is None:
-        st.markdown(f'<div class="hcm-empty">{empty_text}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="hcm-empty">{html.escape(str(empty_text))}</div>', unsafe_allow_html=True)
         return
 
     if isinstance(df, list):
         df = pd.DataFrame(df)
 
     if df.empty:
-        st.markdown(f'<div class="hcm-empty">{empty_text}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="hcm-empty">{html.escape(str(empty_text))}</div>', unsafe_allow_html=True)
         return
 
     data = df.copy()
@@ -557,6 +619,10 @@ def data_table(df, columns=None, headers=None, max_rows=50, empty_text="No recor
     if columns:
         available = [c for c in columns if c in data.columns]
         data = data[available]
+
+    if data.empty:
+        st.markdown(f'<div class="hcm-empty">{html.escape(str(empty_text))}</div>', unsafe_allow_html=True)
+        return
 
     data = data.head(max_rows)
 
@@ -586,3 +652,9 @@ def data_table(df, columns=None, headers=None, max_rows=50, empty_text="No recor
     """
 
     st.markdown(table, unsafe_allow_html=True)
+
+
+# Optional compatibility function.
+# Agar app.py mein ui.inject_input_fix() call ho raha ho, to error nahi aayega.
+def inject_input_fix():
+    return None

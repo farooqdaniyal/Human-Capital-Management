@@ -9,7 +9,25 @@ import streamlit as st
 import ui
 
 
-API_BASE = os.getenv("API_BASE", "http://127.0.0.1:8000")
+# ---------------- page setup ----------------
+st.set_page_config(
+    page_title="HCM Lite",
+    page_icon="🏢",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+ui.inject_css()
+
+
+# ---------------- API BASE ----------------
+try:
+    API_BASE = st.secrets.get("API_BASE", "")
+except Exception:
+    API_BASE = ""
+
+API_BASE = API_BASE or os.getenv("API_BASE", "http://127.0.0.1:8000")
+API_BASE = API_BASE.rstrip("/")
 
 
 # ---------------- basic API helper ----------------
@@ -21,28 +39,17 @@ def api_headers():
 
 
 def api_get(path):
-    r = requests.get(API_BASE + path, headers=api_headers(), timeout=20)
+    r = requests.get(API_BASE + path, headers=api_headers(), timeout=30)
     if r.status_code >= 400:
         raise Exception(f"Error {r.status_code}: {r.text}")
     return r.json()
 
 
 def api_post(path, data=None):
-    r = requests.post(API_BASE + path, json=data or {}, headers=api_headers(), timeout=20)
+    r = requests.post(API_BASE + path, json=data or {}, headers=api_headers(), timeout=30)
     if r.status_code >= 400:
         raise Exception(f"Error {r.status_code}: {r.text}")
     return r.json()
-
-
-# ---------------- page setup ----------------
-st.set_page_config(
-    page_title="HCM Lite",
-    page_icon="🏢",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
-
-ui.inject_css()
 
 
 # ---------------- session helpers ----------------
@@ -148,18 +155,21 @@ MENUS = {
         "Departments",
         "HR Users",
         "Employees",
+        "AI Assistant",
         "Change Password",
     ],
     "hr": [
         "Dashboard",
         "Employees",
         "Leave Approvals",
+        "AI Assistant",
         "Change Password",
     ],
     "employee": [
         "My Dashboard",
         "Apply Leave",
         "My Leaves",
+        "AI Assistant",
         "Change Password",
     ],
 }
@@ -174,6 +184,7 @@ ICONS = {
     "My Dashboard": "🏠",
     "Apply Leave": "📝",
     "My Leaves": "🌴",
+    "AI Assistant": "🤖",
     "Change Password": "🔑",
 }
 
@@ -369,7 +380,6 @@ def render_admin_dashboard():
                     trend_df = pd.DataFrame(trend)
 
                     fig = go.Figure()
-
                     fig.add_trace(
                         go.Scatter(
                             x=trend_df["date"],
@@ -460,7 +470,6 @@ def render_admin_dashboard():
                 bar_df = df.groupby("department").size().reset_index(name="employees")
 
                 fig = go.Figure()
-
                 fig.add_trace(
                     go.Bar(
                         x=bar_df["department"],
@@ -841,6 +850,50 @@ def render_my_leaves():
         st.info("No leave requests yet.")
 
 
+# ---------------- AI assistant ----------------
+def render_ai_assistant():
+    ui.page_header("AI Assistant", "Ask questions from your HR data")
+
+    st.markdown(
+        """
+        <div class="glass-card">
+            <b>Example questions:</b><br/>
+            • Who is on leave today?<br/>
+            • How many employees are in IT?<br/>
+            • How many leaves do I have left?<br/>
+            • What is my salary?<br/>
+            • What is Ali's salary?
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown("")
+
+    question = st.text_area(
+        "Ask your question",
+        placeholder="Ask something about employees, leave, attendance, payroll...",
+        height=120,
+    )
+
+    if st.button("🤖 Ask AI", use_container_width=True):
+        if not question.strip():
+            st.warning("Please write a question.")
+            return
+
+        with st.spinner("AI is thinking..."):
+            try:
+                res = api_post("/ai/chat", {"question": question})
+                st.success("AI-generated answer")
+                st.markdown(res["answer"])
+
+                with st.expander("Debug: tool result"):
+                    st.write(res.get("tool_result"))
+
+            except Exception as e:
+                st.error(str(e))
+
+
 # ---------------- change password ----------------
 def render_change_password():
     ui.page_header("Change Password", "Update your account password")
@@ -898,6 +951,9 @@ def render_page():
 
     elif page == "My Leaves":
         render_my_leaves()
+
+    elif page == "AI Assistant":
+        render_ai_assistant()
 
     elif page == "Change Password":
         render_change_password()

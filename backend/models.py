@@ -62,3 +62,12 @@ class LeaveRequest(Base):
     hr_comment = Column(String, nullable=True)
     approved_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class AiLog(Base):
+    __tablename__ = "ai_logs"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    question = Column(String, nullable=False)
+    answer = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
