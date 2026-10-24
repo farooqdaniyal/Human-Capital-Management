@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic[email]
+pyjwt
+bcrypt
+python-dotenv
+requests
+streamlit
+pandas
+plotly
+groq
+reportlab
