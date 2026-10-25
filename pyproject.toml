@@ -1,23 +1,14 @@
+
 [project]
-name = "hakhathon"
+name = "hcm-lite"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-authors = [
-    { name = "farooqdaniyal", email = "farooqdaniyal151@gmail.com" }
-]
+description = "HCM Lite FastAPI backend"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.162.0",
-    "uvicorn[standard]>=0.54.0",
+    "fastapi",
+    "uvicorn[standard]",
+    "sqlalchemy",
 ]
 
-[project.scripts]
-hakhathon = "hakhathon:main"
-
-[build-system]
-requires = ["uv_build>=0.12.6,<0.13.0"]
-build-backend = "uv_build"
-
 [tool.vercel]
-entrypoint = "backend.main:app"
+entrypoint = "backend/main.py"
